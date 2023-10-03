@@ -18,6 +18,7 @@ def add_track_to_gpx(mode: str, track_datetime: datetime.datetime, coordinate_st
             gpx_tp = gpxpy.gpx.GPXTrackPoint(latitude=point[1], longitude=point[0],
                                              time=track_datetime)
             gpx_segment.points.append(gpx_tp)
+        gpx_track.type = mode
         gpx_track.segments.append(gpx_segment)
         gpx_file.tracks.append(gpx_track)
         print('appended track', track_datetime)
@@ -35,12 +36,36 @@ def add_stay_to_gpx(point_datetime: datetime.datetime, coordinate_str: str):
 def export(month: str):
     global gpx_file
     file = "out/" + str(month) + ".gpx"
-    xml = gpx_file.to_xml()
     print('saving file to', file)
+    xml = gpx_file.to_xml()
     out_file = open(file, "w")
     out_file.write(xml)
     out_file.close()
     gpx_file = gpxpy.gpx.GPX()
+
+
+def map_mode(cmd_mode: str):
+    if cmd_mode == "Mode::Walk":
+        return "walking"
+    elif cmd_mode == "Mode::Bicycle" or cmd_mode == "Mode::Ebicycle":
+        return "cycling"
+    elif cmd_mode == "Mode::Bus":
+        return "bus"
+    elif cmd_mode == "Mode::Tram" or cmd_mode == "Mode::LightRail":
+        return "tram"
+    elif cmd_mode == "Mode::Train" or cmd_mode == "Mode::Subway" or cmd_mode == "Mode::RegionalTrain":
+        return "train"
+    elif cmd_mode == "Mode::Car" or cmd_mode == "Mode::TaxiUber" or cmd_mode == "Mode::CarsharingMobility":
+        return "car"
+    elif cmd_mode == "Mode::Motorbike":
+        return "motorcycle"
+    elif cmd_mode == "Mode::Airplane":
+        return "airplane"
+    elif cmd_mode == "Mode::Boat":
+        return "boat"
+    else:
+        print(cmd_mode, "not able to map.")
+        exit(1)
 
 
 with open('cmd-export.csv', 'r') as csvfile:
@@ -69,9 +94,12 @@ with open('cmd-export.csv', 'r') as csvfile:
             last_month = current_month
 
         if transport_mode == 'Track':
-            add_track_to_gpx(mode=mode, track_datetime=datetime, coordinate_str=coordinates_hex)
+            add_track_to_gpx(mode=map_mode(mode), track_datetime=datetime, coordinate_str=coordinates_hex)
         elif transport_mode == 'Stay':
             add_stay_to_gpx(point_datetime=datetime, coordinate_str=coordinates_hex)
 
 export(current_month)
 exit(1)
+
+
+
