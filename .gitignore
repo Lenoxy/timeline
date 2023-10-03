@@ -1,0 +1,8 @@
+venv/
+*.xml
+*.gpx
+*.qgz
+*.csv
+.idea/
+*.qml
+.DS_Store
