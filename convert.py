@@ -5,6 +5,8 @@ import gpxpy.gpx
 from shapely import wkb
 import csv
 import dateutil.parser.isoparser
+import geopy.distance
+
 
 gpx_file = gpxpy.gpx.GPX()
 
@@ -14,14 +16,28 @@ def add_track_to_gpx(mode: str, track_datetime: datetime.datetime, coordinate_st
         points = wkb.loads(coordinate_str, hex=True).coords
         gpx_track = gpxpy.gpx.GPXTrack()
         gpx_segment = gpxpy.gpx.GPXTrackSegment()
+
+        last_coords = (0,0)
+        skip_append = False
         for point in points:
             gpx_tp = gpxpy.gpx.GPXTrackPoint(latitude=point[1], longitude=point[0],
                                              time=track_datetime)
             gpx_segment.points.append(gpx_tp)
-        gpx_track.type = mode
-        gpx_track.segments.append(gpx_segment)
-        gpx_file.tracks.append(gpx_track)
-        print('appended track', track_datetime)
+            # only save the track to file if points are closer than 100m apart. Ignore tracks far apart
+            current_coords = (point[1], point[0])
+            if last_coords != (0,0) and geopy.distance.geodesic(last_coords, current_coords).km > 5:
+                skip_append = True
+                break
+
+            last_coords = current_coords
+        if skip_append == False:
+            gpx_track.type = mode
+            gpx_track.segments.append(gpx_segment)
+            gpx_file.tracks.append(gpx_track)
+            print('appended track', track_datetime)
+        else:
+            print("skip_append has been set, skipping this track.")
+
     except:
         print('error', mode, track_datetime, coordinate_str)
 
