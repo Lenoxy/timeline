@@ -20,8 +20,8 @@ def track_segments_to_single_segment(track: gpxpy.gpx.GPXTrack) -> GPXTrackSegme
     return return_segment
 
 
-def is_too_inexact(point_a, point_b) -> bool:
-    return geopy.distance.geodesic(point_a, point_b).m > 300
+def is_exact(point_a, point_b) -> bool:
+    return geopy.distance.geodesic(point_a, point_b).m < 300
 
 
 gpx_input_file = open('./out/2023-6.gpx', 'r')
@@ -45,7 +45,7 @@ for track in old_gpx.tracks:
     has_point_to_save = False
     for point in single_segment.points:
         current_coordinates = (point.longitude, point.latitude)
-        if has_point_to_save and is_too_inexact(current_coordinates, last_coordinates):
+        if has_point_to_save and not is_exact(current_coordinates, last_coordinates):
             save_segment(loop_segment)
             loop_segment = create_loop_segment()
             has_point_to_save = False
