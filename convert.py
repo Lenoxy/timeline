@@ -1,11 +1,9 @@
 import datetime
-
 import gpxpy
 import gpxpy.gpx
 from shapely import wkb
 import csv
 import dateutil.parser.isoparser
-import geopy.distance
 
 gpx_file = gpxpy.gpx.GPX()
 
